@@ -85,7 +85,6 @@ class DropDownField extends FormField<String> {
       this.strict: true})
       : super(
           key: key,
-          autovalidate: false,
           initialValue: controller != null ? controller.text : (value ?? ''),
           onSaved: setter,
           builder: (FormFieldState<String> field) {
@@ -116,7 +115,6 @@ class DropDownField extends FormField<String> {
                   children: <Widget>[
                     Expanded(
                       child: TextFormField(
-                        autovalidate: true,
                         controller: state._effectiveController,
                         decoration: effectiveDecoration.copyWith(
                             errorText: field.errorText),
@@ -126,25 +124,26 @@ class DropDownField extends FormField<String> {
                         obscureText: false,
                         maxLengthEnforced: true,
                         maxLines: 1,
-                        validator: (String newValue) {
+                        validator: (value) {
                           if (required) {
-                            if (newValue == null || newValue.isEmpty)
+                            if (value.isEmpty) {
                               return 'Dit veld mag niet leeg zijn';
+                            }
+
+                            return null;
                           }
 
-                          //Items null check added since there could be an initial brief period of time
-                          //when the dropdown items will not have been loaded
                           if (items != null) {
                             if (strict &&
-                                newValue.isNotEmpty &&
-                                !items.contains(newValue))
-                              return 'Verkeerde waarde';
+                                value.isNotEmpty &&
+                                !items.contains(value)) {
+                              return 'Het verplichte veld bevat een verkeerde waarde';
+                            }
                           }
 
                           return null;
                         },
                         onSaved: setter,
-                        enabled: enabled,
                         inputFormatters: inputFormatters,
                       ),
                     ),
@@ -161,14 +160,11 @@ class DropDownField extends FormField<String> {
                     ? Container()
                     : Container(
                         alignment: Alignment.topLeft,
-                        height: itemsVisibleInDropdown *
-                            48.0, //limit to default 3 items in dropdownlist view and then remaining scrolls
-                        width: MediaQuery.of(field.context).size.width,
+                        height: items.length * 65.0,
                         child: ListView(
                           cacheExtent: 0.0,
                           scrollDirection: Axis.vertical,
                           controller: _scrollController,
-                          padding: EdgeInsets.only(left: 40.0),
                           children: items.isNotEmpty
                               ? ListTile.divideTiles(
                                       context: field.context,
@@ -251,35 +247,39 @@ class DropDownFieldState extends FormFieldState<String> {
     });
   }
 
-  List<ListTile> _getChildren(List<String> items) {
-    List<ListTile> childItems = List();
+  List<Card> _getChildren(List<String> items) {
+    List<Card> childItems = List();
     for (var item in items) {
       if (_searchText.isNotEmpty) {
         if (item.toUpperCase().contains(_searchText.toUpperCase()))
-          childItems.add(_getListTile(item));
+          childItems.add(_getCard(item));
       } else {
-        childItems.add(_getListTile(item));
+        childItems.add(_getCard(item));
       }
     }
     _isSearching ? childItems : List();
     return childItems;
   }
 
-  ListTile _getListTile(String text) {
-    return ListTile(
-      dense: true,
-      title: Text(
-        text,
+  Card _getCard(String text) {
+    return Card(
+      color: Colors.grey[100],
+      elevation: 0,
+      child: ListTile(
+        dense: false,
+        title: Text(text),
+        onTap: () {
+          setState(() {
+            _effectiveController.text = text;
+            _isSearching = false;
+            _handleControllerChanged();
+            if (widget.onValueChanged != null) {
+              widget.onValueChanged(text);
+            }
+            _showdropdown = false;
+          });
+        },
       ),
-      onTap: () {
-        setState(() {
-          _effectiveController.text = text;
-          _handleControllerChanged();
-          _showdropdown = false;
-          _isSearching = false;
-          if (widget.onValueChanged != null) widget.onValueChanged(text);
-        });
-      },
     );
   }
 
