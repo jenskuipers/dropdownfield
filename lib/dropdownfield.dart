@@ -251,10 +251,17 @@ class DropDownFieldState extends FormFieldState<String> {
     List<Card> childItems = List();
     for (var item in items) {
       if (_searchText.isNotEmpty) {
+<<<<<<< HEAD
         if (item.toUpperCase() != _searchText.toUpperCase()) {
           if (item.toUpperCase().contains(_searchText.toUpperCase()))
             childItems.add(_getCard(item));
         }
+=======
+        if (item.toUpperCase() != _searchText.toUpperCase()) if (item
+            .toUpperCase()
+            .contains(_searchText.toUpperCase()))
+          childItems.add(_getCard(item));
+>>>>>>> a20c8dd8f43ae64e98e830fc76c82df17367d870
       } else {
         childItems.add(_getCard(item));
       }
