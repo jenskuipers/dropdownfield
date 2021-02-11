@@ -160,7 +160,7 @@ class DropDownField extends FormField<String> {
                     ? Container()
                     : Container(
                         alignment: Alignment.topLeft,
-                        height: items.length * 65.0,
+                        height: state._getChildren(state._items).length * 65.0,
                         child: ListView(
                           cacheExtent: 0.0,
                           scrollDirection: Axis.vertical,
@@ -251,8 +251,10 @@ class DropDownFieldState extends FormFieldState<String> {
     List<Card> childItems = List();
     for (var item in items) {
       if (_searchText.isNotEmpty) {
-        if (item.toUpperCase().contains(_searchText.toUpperCase()))
-          childItems.add(_getCard(item));
+        if (item.toUpperCase() != _searchText.toUpperCase()) {
+          if (item.toUpperCase().contains(_searchText.toUpperCase()))
+            childItems.add(_getCard(item));
+        }
       } else {
         childItems.add(_getCard(item));
       }
