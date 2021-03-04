@@ -169,7 +169,6 @@ class DropDownField extends FormField<String> {
                             state._getChildren(state._items).isEmpty)
                     ? Container()
                     : Container(
-                        color: Colors.yellow,
                         height: state._getChildren(state._items).isNotEmpty
                             ? 70.0 * state._items.length
                             : 70,
