@@ -55,6 +55,8 @@ class DropDownField extends FormField<String> {
   final ValueChanged<dynamic> onValueChanged;
   final bool strict;
   final int itemsVisibleInDropdown;
+  final bool autofocus;
+  final dynamic textInputAction;
 
   /// Controls the text being edited.
   ///
@@ -82,7 +84,9 @@ class DropDownField extends FormField<String> {
       this.onValueChanged,
       this.itemsVisibleInDropdown: 3,
       this.enabled: true,
-      this.strict: true})
+      this.strict: true,
+      this.autofocus: false,
+      this.textInputAction})
       : super(
           key: key,
           initialValue: controller != null ? controller.text : (value ?? ''),
@@ -109,9 +113,12 @@ class DropDownField extends FormField<String> {
                 labelText: labelText);
 
             return Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Expanded(
                       child: TextFormField(
@@ -120,7 +127,8 @@ class DropDownField extends FormField<String> {
                             errorText: field.errorText),
                         style: textStyle,
                         textAlign: TextAlign.start,
-                        autofocus: false,
+                        autofocus: autofocus,
+                        textInputAction: textInputAction,
                         obscureText: false,
                         maxLengthEnforced: true,
                         maxLines: 1,
@@ -153,19 +161,26 @@ class DropDownField extends FormField<String> {
                         if (!enabled) return;
                         state.clearValue();
                       },
-                    )
+                    ),
                   ],
                 ),
-                !state._showdropdown
+                !state._showdropdown ||
+                        (state._showdropdown &&
+                            state._getChildren(state._items).isEmpty)
                     ? Container()
                     : Container(
-                        alignment: Alignment.topLeft,
-                        height: state._getChildren(state._items).length * 65.0,
+                        color: Colors.yellow,
+                        height: state._getChildren(state._items).isNotEmpty
+                            ? 70.0 * state._items.length
+                            : 70,
+                        width: state._getChildren(state._items).isNotEmpty
+                            ? 505.0 * state._items.length
+                            : 505,
                         child: ListView(
                           cacheExtent: 0.0,
                           scrollDirection: Axis.vertical,
                           controller: _scrollController,
-                          children: items.isNotEmpty
+                          children: state._getChildren(state._items).isNotEmpty
                               ? ListTile.divideTiles(
                                       context: field.context,
                                       tiles: state._getChildren(state._items))
@@ -249,24 +264,16 @@ class DropDownFieldState extends FormFieldState<String> {
 
   List<Card> _getChildren(List<String> items) {
     List<Card> childItems = List();
-    for (var item in items) {
+    for (String item in items) {
       if (_searchText.isNotEmpty) {
-<<<<<<< HEAD
         if (item.toUpperCase() != _searchText.toUpperCase()) {
           if (item.toUpperCase().contains(_searchText.toUpperCase()))
             childItems.add(_getCard(item));
         }
-=======
-        if (item.toUpperCase() != _searchText.toUpperCase()) if (item
-            .toUpperCase()
-            .contains(_searchText.toUpperCase()))
-          childItems.add(_getCard(item));
->>>>>>> a20c8dd8f43ae64e98e830fc76c82df17367d870
       } else {
         childItems.add(_getCard(item));
       }
     }
-    _isSearching ? childItems : List();
     return childItems;
   }
 
